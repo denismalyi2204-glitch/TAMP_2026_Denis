@@ -90,7 +90,7 @@ Date:   Sun Mar 8 20:47:00 2026 +0300
 Username for 'https://github.com': denismalyi2204
 Password for 'https://denismalyi2204@github.com': 
 
-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Enumerating objects: 12, done.
+Enumerating objects: 12, done.
 Counting objects: 100% (12/12), done.
 Delta compression using up to 4 threads
 Compressing objects: 100% (8/8), done.
