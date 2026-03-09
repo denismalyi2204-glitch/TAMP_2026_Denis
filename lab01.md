@@ -93,4 +93,144 @@ $ cd reports/lab${LAB_NUMBER}
 $ edit REPORT.md
 $ gist REPORT.md
 ```
-Создаем папку с копией лабораторной работы, редактируем файл с помощью текстового редактора, затем отправляем на GitHub 
+Создаем папку с копией лабораторной работы, редактируем файл с помощью текстового редактора, затем отправляем на GitHub
+
+## Homework
+```cpp
+$ wget https://sourceforge.net/projects/boost/files/boost/1.69.0/boost_1_69_0.tar.gz
+```
+Скачиваем библиотеку _boost_ с помощью утилиты wget.
+
+
+```sh
+$ tar -xf boost_1_69_0.tar.gz -C ~
+$ cd ~/boost_1_69_0
+```
+Разархивируем скаченный файл в директорию ~/boost_1_69_0
+
+
+```sh
+$ find -maxdepth 1 ! -type d  | wc
+```
+Подсчитаем количество файлов в директории ~/boost_1_69_0, не включая вложенные директории
+```sh
+     16      16     210
+```
+Вывод консоли
+
+
+```sh
+$ find ! -type d | wc
+```
+ Подсчитаем количество файлов в директории ~/boost_1_69_0 включая вложенные директории.
+```sh
+  62053   62056 3161318
+```
+Вывод консоли
+
+
+```sh
+$ find ! -type d -name "*.h" | wc
+$ find ! -type d -name "*.cpp" | wc
+$ find ! -type d ! -name "*.cpp" ! -name "*.h" | wc
+```
+Подсчитаем количество заголовочных файлов, файлов с расширением cpp, остальные файлы.
+```sh
+    296     296   11738
+  13789   13789  648515
+  47968   47971 2501065
+```
+Вывод консоли
+
+```cpp
+$ find -name "any.hpp"
+./boost/fusion/include/any.hpp
+./boost/fusion/algorithm/query/detail/any.hpp
+./boost/fusion/algorithm/query/any.hpp
+./boost/proto/detail/any.hpp
+./boost/hana/fwd/any.hpp
+./boost/hana/any.hpp
+./boost/xpressive/detail/utility/any.hpp
+./boost/any.hpp
+./boost/type_erasure/any.hpp
+./boost/spirit/home/support/algorithm/any.hpp
+```
+Найдём полный пусть до файла any.hpp внутри библиотеки boost.
+
+```sh
+$ grep -lr "boost::asio"
+```
+Выведем в консоль все файлы, где упоминается последовательность boost::asio.
+
+```sh
+$ ./bootstrap.sh
+$ sudo ./b2 install
+```
+Скомпилируем boost
+
+```sh
+$ mkdir ~/boost-libs
+$ cp `find -name "*.a"` ~/boost-libs
+```
+Переносим все скомпилированные ранее статические библиотеки в директорию ~/boost-libs.
+
+```sh
+$ cd ~/boost-libs
+$ find ! -type d -exec du -h {} +
+```
+Подсчитаем сколько занимает дискового пространства каждый файл в этой директории.
+```cpp
+544K	./libboost_math_c99.a
+172K	./libboost_iostreams.a
+24K	./libboost_stacktrace_addr2line.a
+1.2M	./libboost_serialization.a
+2.7M	./libboost_regex.a
+4.0K	./libboost_exception.a
+212K	./libboost_prg_exec_monitor.a
+2.3M	./libboost_test_exec_monitor.a
+152K	./libboost_date_time.a
+232K	./libboost_fiber.a
+4.5M	./libboost_wave.a
+16K	./libboost_stacktrace_basic.a
+56K	./libboost_timer.a
+848K	./libboost_graph.a
+80K	./libboost_random.a
+332K	./libboost_contract.a
+2.7M	./libboost_math_tr1.a
+4.0K	./libboost_atomic.a
+20K	./libboost_stacktrace_backtrace.a
+1.6M	./libboost_program_options.a
+464K	./libboost_math_c99l.a
+4.0K	./libboost_stacktrace_noop.a
+148K	./libboost_container.a
+4.0K	./libboost_system.a
+24K	./libboost_context.a
+416K	./libboost_filesystem.a
+796K	./libboost_wserialization.a
+2.7M	./libboost_math_tr1l.a
+2.0M	./libboost_locale.a
+2.6M	./libboost_math_tr1f.a
+236K	./libboost_chrono.a
+448K	./libboost_math_c99f.a
+2.3M	./libboost_unit_test_framework.a
+```
+Вывод консоли
+
+```sh
+$ find ! -type d -exec du {} + | sort -rn | head -n 10
+```
+Находим 10 самых "тяжёлых" файлов.
+```cpp
+10
+4588	./libboost_wave.a
+2756	./libboost_regex.a
+2732	./libboost_math_tr1.a
+2700	./libboost_math_tr1l.a
+2648	./libboost_math_tr1f.a
+2308	./libboost_test_exec_monitor.a
+2288	./libboost_unit_test_framework.a
+2044	./libboost_locale.a
+1576	./libboost_program_options.a
+1200	./libboost_serialization.a
+```
+Вывод консоли
