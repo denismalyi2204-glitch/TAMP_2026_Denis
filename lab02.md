@@ -113,3 +113,237 @@ $ gist REPORT.md
 Далее создаем папки, в них создаем файлы cpp, затем коммитим их
 
 С помощью gist пишем репорт
+
+## Homework
+
+### Часть I
+
+   ```
+   git clone https://github.com/denismalyi2204-glitch/cpp-hello-world.git
+   cd cpp-hello-world
+   echo "# TP-lab02" >> README.md
+   git add README.md
+   git commit -m "first commit"
+   git branch -M main
+   git push -u origin main
+   ```
+Выполнено клонирование пустого репозитория, первый коммит, создали файл README.md, отправили изменения на удалённый репозиторий
+
+
+   ```
+   nano hello_world.cpp
+   ```
+
+   ```cpp
+   #include <iostream>
+   using namespace std;
+   
+   int main() {   
+	   cout << "Hello, World!" << endl;     
+	   return 0;
+   }
+   ```
+   
+   ```
+   git add hello_world.cpp
+   git commit -m "added hello_world.cpp"
+   ```
+Создали файл hello_world.cpp, реализовали программу "Hellow world" с умышленным плохим стилем, файл закоммичен с сообщением
+
+
+   ```cpp
+   #include <iostream>
+   #include <string>
+   using namespace std;
+   
+   int main() { 
+	   string name; 
+	   cout << "Please enter name: ";    
+	   cin >> name;      
+	   cout << "Hello world from " << name;
+   }
+   ```
+   
+   ```
+   git add hello_world.cpp
+   git commit -m "updated hello_world.cpp to ask for name"
+   ```
+ Обновили код для запроса имени пользователя, также закоммитили изменения
+
+
+   ```
+   git push origin main
+   ```
+ Отправили изменения на удалённый репозиторий
+
+### Часть II
+
+   ```
+   git branch patch1
+   git checkout patch1
+   ```
+ Создали локальную ветку patch1, переключились на неё
+
+
+
+   ```
+   nano hello_world.cpp
+   ```
+
+   ```cpp
+   #include <iostream>
+   #include <string>
+   
+   int main() {
+       std::string name;
+       std::cout << "Please enter name: ";
+       std::cin >> name;
+       std::cout << "Hello world from " << name;
+   }
+   ```
+   ```
+   git add hello_world.cpp
+   git commit -m "patched hello_world.cpp"
+   git push origin patch1
+   ```
+ В ветке `patch1` исправили код: убрали директиву using namespace std, добавили префиксы std::, закоммитили, отправили на удалённый репозиторий
+
+Создали pull request, изменения корректны
+
+
+   ```
+   nano hello_world.cpp
+   ```
+   
+   ```cpp
+   #include <iostream>
+   #include <string>
+   
+   int main() {
+       std::string name;
+       // Запрос имени пользователя
+       std::cout << "Please enter name: ";
+       std::cin >> name;
+       // Вывод приветствия
+       std::cout << "Hello world from " << name;
+   }
+   ```
+   ```
+   git add hello_world.cpp
+   git commit -m "added comment"
+   git push origin patch1
+   ```
+В ветке `patch1` добавили комментарии к коду, закоммитили изменения, выполнили push в удалённую ветку
+
+
+   ```
+   git checkout main
+   git pull origin main
+   git branch -d patch1
+   ```
+На GitHub выполнили слияние pull request, удалили ветку patch1, выполнили обновление ветки main
+
+
+### Часть III
+
+   ```
+   git checkout -b patch2
+   ```
+Создали локальную ветка patch2 от main
+
+   ```
+   sudo apt install clang-format
+   clang-format -style=Mozilla -i hello_world.cpp
+   ```
+   
+   ```cpp
+   #include <iostream>
+   #include <string>
+   
+   int
+   main()
+   {
+     std::string name;
+     // Запрос имени пользователя
+     std::cout << "Please enter name: ";
+     std::cin >> name;
+     // Вывод приветствия
+     std::cout << "Hello world from " << name;
+   }
+   ```
+   ```
+   git add hello_world.cpp
+   git commit -m "changed codestyle"
+   git push origin patch2
+   ```
+Установили утилиту clang-format, отформатировали в стиле Mozilla, закоммитили, отправили на удалённый репозиторий, создали pull request 
+
+
+Далее создали конфликт: в ветке main на GitHub изменили комментарий в коде. Поэтому в pull request появилось предупреждение о конфликте, так как обе ветки изменили одни и те же строки
+
+
+   
+   ```
+   nano hello_world.cpp
+   ```
+   
+   ```cpp
+   #include <iostream>
+   #include <string>
+   
+   <<<<<<< HEAD
+   int main() {
+       std::string name;
+       // Запрос имени пользователя
+       std::cout << "Please enter name: ";
+       std::cin >> name;
+       // Вывод приветствия
+       std::cout << "Hello world from " << name;
+   }// Тут должна была быть реклама
+   =======
+   int
+   main()
+   {
+     std::string name;
+     // Запрос имени пользователя
+     std::cout << "Please enter name: ";
+     std::cin >> name;
+     // Вывод приветствия
+     std::cout << "Hello world from " << name;
+   }
+   >>>>>>> 77ef672 (changed codestyle)
+   ```
+   
+   ```cpp
+   #include <iostream>
+   #include <string>
+   
+   int
+   main()
+   {
+     std::string name;
+     // Запрос имени пользователя
+     std::cout << "Please enter name: ";
+     std::cin >> name;
+     // Вывод приветствия
+     std::cout << "Hello world from " << name;
+   }// Тут должна была быть реклама
+   ```
+   
+   ```
+   git add hello_world.cpp
+   git rebase --continue
+   git push -f origin patch2
+   ```
+   Был конфликт в файле hello_world.cpp, разрешили вручную: объединили изменения из обеих версий. Выполнили force push, так как история ветки изменилась
+
+
+   ```
+   git checkout main
+   git pull origin main
+   git branch -d patch2
+   git log --oneline --graph --all
+   ```
+Конфликты в pull request исчезли после force push, выполнили слияние pull request на GitHub, обновили main, удалили ветку patch2
+
+
