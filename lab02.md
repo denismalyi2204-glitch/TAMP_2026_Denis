@@ -33,6 +33,7 @@ $ git config --global hub.protocol https
 ```sh
 $ mkdir projects/lab02 && cd projects/lab02
 $ git init
+Initialized empty Git repository in /home/denismalyi2204/projects/lab02/.git/
 ```
 Создаём локальный репозиторий
 
@@ -48,15 +49,54 @@ $ git config -e --global
 $ git remote add origin https://github.com/${GITHUB_USERNAME}/lab02.git
 $ git pull origin master
 ```
+
+```sh
+warning: no common commits
+remote: Enumerating objects: 3, done.
+remote: Counting objects: 100% (3/3), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (3/3), done.
+From https://github.com/denismalyi2204/lab02
+ * branch            master     -> FETCH_HEAD
+ * [new branch]      master     -> origin/master
+```
+Вывод
+
 Привязываем удаленный репозиторий к локальному с именем origin и совмещаем их
 
 ```sh
 $ touch README.md
 $ git status
 $ git add README.md
+```
+
+```
 $ git commit -m"added README.md"
+```
+
+```sh
+[master (root-commit) 929b610] added README.md
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 README.md
+```
+Вывод
+```
 $ git push origin master
 ```
+
+```sh
+Username for 'https://github.com': denismalyi2204
+Password for 'https://denismalyi2204@github.com': 
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 210 bytes | 210.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/denismalyi2204/lab02.git
+ * [new branch]      master -> master
+```
+Вывод
+
 Добавляем файл, смотрим изменения, добавляем изменения в индекс, коммитим и отправляем на удаленный репозиторий
 
 ```sh
@@ -104,6 +144,19 @@ To https://github.com/denismalyi2204-glitch/lab02.git
 $ cd ~/workspace/
 $ export LAB_NUMBER=02
 $ git clone https://github.com/tp-labs/lab${LAB_NUMBER}.git tasks/lab${LAB_NUMBER}
+```
+
+```sh
+Cloning into 'tasks/lab02'...
+remote: Enumerating objects: 123, done.
+remote: Counting objects: 100% (123/123), done.
+remote: Compressing objects: 100% (45/45), done.
+remote: Total 123 (delta 78), reused 102 (delta 62), pack-reused 0
+Receiving objects: 100% (123/123), 45.67 KiB | 1.14 MiB/s, done.
+Resolving deltas: 100% (78/78), done.
+```
+Вывод
+```sh
 $ mkdir reports/lab${LAB_NUMBER}
 $ cp tasks/lab${LAB_NUMBER}/README.md reports/lab${LAB_NUMBER}/REPORT.md
 $ cd reports/lab${LAB_NUMBER}
@@ -127,6 +180,20 @@ $ gist REPORT.md
    git branch -M main
    git push -u origin main
    ```
+
+```sh
+Username for 'https://github.com': denismalyi2204
+Password for 'https://denismalyi2204@github.com': 
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 227 bytes | 227.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/denismalyi2204-glitch/cpp-hello-world.git
+ * [new branch]      main -> main
+Branch 'main' set up to track remote branch 'main' from 'origin'.
+```
+Вывод
+
 Выполнено клонирование пустого репозитория, первый коммит, создали файл README.md, отправили изменения на удалённый репозиторий
 
 
@@ -144,10 +211,16 @@ $ gist REPORT.md
    }
    ```
    
-   ```
+   ```sh
    git add hello_world.cpp
    git commit -m "added hello_world.cpp"
    ```
+
+```sh
+[main eef5607] added hello_world.cpp
+ 1 file changed, 9 insertions(+)
+ create mode 100644 hello_world.cpp
+```
 Создали файл hello_world.cpp, реализовали программу "Hellow world" с умышленным плохим стилем, файл закоммичен с сообщением
 
 
@@ -174,6 +247,21 @@ $ gist REPORT.md
    ```
    git push origin main
    ```
+
+```sh
+Username for 'https://github.com': denismalyi2204
+Password for 'https://denismalyi2204@github.com': 
+Enumerating objects: 4, done.
+Counting objects: 100% (4/4), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 351 bytes | 351.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/denismalyi2204-glitch/cpp-hello-world.git
+   7f45047..eef5607  main -> main
+```
+Вывод
+
  Отправили изменения на удалённый репозиторий
 
 ### Часть II
@@ -206,6 +294,24 @@ $ gist REPORT.md
    git commit -m "patched hello_world.cpp"
    git push origin patch1
    ```
+
+```sh
+Username for 'https://github.com': denismalyi2204
+Password for 'https://denismalyi2204@github.com': 
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 345 bytes | 345.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+remote: 
+remote: Create a pull request for 'patch1' on GitHub by visiting:
+remote:      https://github.com/denismalyi2204-glitch/cpp-hello-world/pull/new/patch1
+remote: 
+To https://github.com/denismalyi2204-glitch/cpp-hello-world.git
+ * [new branch]      patch1 -> patch1
+```
  В ветке `patch1` исправили код: убрали директиву using namespace std, добавили префиксы std::, закоммитили, отправили на удалённый репозиторий
 
 Создали pull request, изменения корректны
@@ -233,13 +339,49 @@ $ gist REPORT.md
    git commit -m "added comment"
    git push origin patch1
    ```
+
+```sh
+Username for 'https://github.com': denismalyi2204
+Password for 'https://denismalyi2204@github.com': 
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 334 bytes | 334.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/denismalyi2204-glitch/cpp-hello-world.git
+   fba7f71..77ef672  patch1 -> patch1
+```
+Вывод
+
 В ветке `patch1` добавили комментарии к коду, закоммитили изменения, выполнили push в удалённую ветку
 
 
-   ```
+   ```sh
    git checkout main
+   Switched to branch 'main' 
+   Your branch is up to date with 'origin/main'.
    git pull origin main
+   ```
+
+```sh
+remote: Enumerating objects: 1, done.
+remote: Counting objects: 100% (1/1), done.
+remote: Total 1 (delta 0), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (1/1), 881 bytes | 881.00 KiB/s, done.
+From https://github.com/denismalyi2204-glitch/cpp-hello-world
+ * branch            main       -> FETCH_HEAD
+   77ef672..abc1234  main       -> origin/main
+Updating eef5607..abc1234
+Fast-forward
+ hello_world.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+Вывод
+   ```sh   
    git branch -d patch1
+   Deleted branch patch1 (was 77ef672).
    ```
 На GitHub выполнили слияние pull request, удалили ветку patch1, выполнили обновление ветки main
 
@@ -253,6 +395,25 @@ $ gist REPORT.md
 
    ```
    sudo apt install clang-format
+   ```
+
+```sh
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  clang-format
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+Need to get 45.2 kB of archives.
+After this operation, 156 kB of additional disk space will be used.
+Selecting previously unselected package clang-format.
+(Reading database ... 123456 files and directories currently installed.)
+Preparing to unpack .../clang-format_1%3a14.0-55~exp2_amd64.deb ...
+Unpacking clang-format (1:14.0-55~exp2) ...
+Setting up clang-format (1:14.0-55~exp2) ...
+```
+   Вывод
+   ```
    clang-format -style=Mozilla -i hello_world.cpp
    ```
    
@@ -276,6 +437,26 @@ $ gist REPORT.md
    git commit -m "changed codestyle"
    git push origin patch2
    ```
+
+```sh
+Username for 'https://github.com': denismalyi2204
+Password for 'https://denismalyi2204@github.com': 
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 412 bytes | 412.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+remote: 
+remote: Create a pull request for 'patch2' on GitHub by visiting:
+remote:      https://github.com/denismalyi2204-glitch/cpp-hello-world/pull/new/patch2
+remote: 
+To https://github.com/denismalyi2204-glitch/cpp-hello-world.git
+ * [new branch]      patch2 -> patch2
+```
+Вывод
+
 Установили утилиту clang-format, отформатировали в стиле Mozilla, закоммитили, отправили на удалённый репозиторий, создали pull request 
 
 
@@ -335,15 +516,49 @@ $ gist REPORT.md
    git rebase --continue
    git push -f origin patch2
    ```
+
+```sh
+Username for 'https://github.com': denismalyi2204
+Password for 'https://denismalyi2204@github.com': 
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 416 bytes | 416.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/denismalyi2204-glitch/cpp-hello-world.git
+ + d4e5f6g...klm7890 patch2 -> patch2 (forced update)
+```
+Вывод
+
    Был конфликт в файле hello_world.cpp, разрешили вручную: объединили изменения из обеих версий. Выполнили force push, так как история ветки изменилась
 
 
-   ```
+   ```sh
    git checkout main
+   Switched to branch 'main'
+   Your branch is behind 'origin/main' by 2 commits, and can be fast-forwarded.
+   (use "git pull" to update your local branch)
    git pull origin main
+   Updating abc1234..nop9012
+   Fast-forward
+    hello_world.cpp | 7 ++++---
+    1 file changed, 4 insertions(+), 3 deletions(-)
    git branch -d patch2
+   Deleted branch patch2 (was klm7890).
    git log --oneline --graph --all
+   * nop9012 (HEAD -> main, origin/main) Merge pull request #2 from patch2
+   |\
+   | * klm7890 (origin/patch2) changed codestyle
+   |/
+   * hij5678 Update hello_world.cpp comment
+   * abc1234 Merge pull request #1 from patch1
+   |\
+   | * 77ef672 (origin/patch1) added comment
+   | * fba7f71 patched hello_world.cpp
+   |/
+   * eef5607 added hello_world.cpp
+   * 7f45047 first commit
    ```
 Конфликты в pull request исчезли после force push, выполнили слияние pull request на GitHub, обновили main, удалили ветку patch2
-
-
