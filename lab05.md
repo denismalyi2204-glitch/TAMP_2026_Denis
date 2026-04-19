@@ -1,5 +1,7 @@
 ## Laboratory work V
 
+## Laboratory work V
+
 Данная лабораторная работа посвещена изучению фреймворков для тестирования на примере **GTest**
 ## Report
 
@@ -268,216 +270,40 @@ git clone https://github.com/denismalyi2204-glitch/banking.git
 cd banking
 ```
 
+```sh
+remote: Enumerating objects: 137, done.
+remote: Counting objects: 100% (25/25), done.
+remote: Compressing objects: 100% (9/9), done.
+remote: Total 137 (delta 18), reused 16 (delta 16), pack-reused 112 (from 1)
+Receiving objects: 100% (137/137), 918.92 KiB | 1.14 MiB/s, done.
+Resolving deltas: 100% (60/60), done.
+```
+
 Создаем структуру проекта
 ```bash
 mkdir -p include src tests .github/workflows
 ```
 
-Создание Account.h
-```bash
-cat > include/Account.h <<'EOF'
-#pragma once
-#include <string>
-
-class Account {
-private:
-    std::string accountNumber;
-    double balance;
-    std::string ownerName;
-
-public:
-    Account(const std::string& number, const std::string& owner, double initialBalance = 0.0);
-    
-    std::string getAccountNumber() const;
-    std::string getOwnerName() const;
-    double getBalance() const;
-    
-    void deposit(double amount);
-    bool withdraw(double amount);
-    bool transferTo(Account& to, double amount);
-};
-EOF
-```
-
-Созданем Account.cpp
-```bash
-cat > src/Account.cpp <<'EOF'
-#include "Account.h"
-#include <stdexcept>
-
-Account::Account(const std::string& number, const std::string& owner, double initialBalance)
-    : accountNumber(number), ownerName(owner), balance(initialBalance) {
-    if (initialBalance < 0) {
-        throw std::invalid_argument("Initial balance cannot be negative");
-    }
-}
-
-std::string Account::getAccountNumber() const {
-    return accountNumber;
-}
-
-std::string Account::getOwnerName() const {
-    return ownerName;
-}
-
-double Account::getBalance() const {
-    return balance;
-}
-
-void Account::deposit(double amount) {
-    if (amount <= 0) {
-        throw std::invalid_argument("Deposit amount must be positive");
-    }
-    balance += amount;
-}
-
-bool Account::withdraw(double amount) {
-    if (amount <= 0) {
-        throw std::invalid_argument("Withdrawal amount must be positive");
-    }
-    if (amount > balance) {
-        return false;
-    }
-    balance -= amount;
-    return true;
-}
-
-bool Account::transferTo(Account& to, double amount) {
-    if (withdraw(amount)) {
-        to.deposit(amount);
-        return true;
-    }
-    return false;
-}
-EOF
-```
-
-Создаем Transaction.h
-```bash
-cat > include/Transaction.h <<'EOF'
-#pragma once
-#include <string>
-#include <chrono>
-#include <memory>
-
-class Account;
-
-class Transaction {
-private:
-    std::string transactionId;
-    std::string fromAccount;
-    std::string toAccount;
-    double amount;
-    std::chrono::system_clock::time_point timestamp;
-    bool success;
-
-public:
-    Transaction(const std::string& from, const std::string& to, double amount);
-    
-    std::string getTransactionId() const;
-    std::string getFromAccount() const;
-    std::string getToAccount() const;
-    double getAmount() const;
-    std::chrono::system_clock::time_point getTimestamp() const;
-    bool isSuccess() const;
-    
-    void setSuccess(bool success);
-    bool execute(std::shared_ptr<Account> from, std::shared_ptr<Account> to);
-};
-EOF
-```
-
-Создаем Transaction.cpp
-```bash
-cat > src/Transaction.cpp <<'EOF'
-#include "Transaction.h"
-#include "Account.h"
-#include <chrono>
-#include <sstream>
-#include <iomanip>
-
-Transaction::Transaction(const std::string& from, const std::string& to, double amount)
-    : fromAccount(from), toAccount(to), amount(amount), success(false) {
-    
-    auto now = std::chrono::system_clock::now();
-    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
-    auto value = now_ms.time_since_epoch().count();
-    
-    std::stringstream ss;
-    ss << std::hex << value;
-    transactionId = ss.str();
-    timestamp = now;
-}
-
-std::string Transaction::getTransactionId() const {
-    return transactionId;
-}
-
-std::string Transaction::getFromAccount() const {
-    return fromAccount;
-}
-
-std::string Transaction::getToAccount() const {
-    return toAccount;
-}
-
-double Transaction::getAmount() const {
-    return amount;
-}
-
-std::chrono::system_clock::time_point Transaction::getTimestamp() const {
-    return timestamp;
-}
-
-bool Transaction::isSuccess() const {
-    return success;
-}
-
-void Transaction::setSuccess(bool success) {
-    this->success = success;
-}
-
-bool Transaction::execute(std::shared_ptr<Account> from, std::shared_ptr<Account> to) {
-    if (!from || !to) {
-        return false;
-    }
-    
-    if (from->getAccountNumber() != fromAccount || to->getAccountNumber() != toAccount) {
-        return false;
-    }
-    
-    success = from->transferTo(*to, amount);
-    return success;
-}
-EOF
-```
 
 Создаем CMakeLists.txt
 ```bash
 cat > CMakeLists.txt <<'EOF'
 cmake_minimum_required(VERSION 3.14)
 project(banking)
-
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
 add_library(banking STATIC
-    src/Account.cpp
-    src/Transaction.cpp
+    Account.cpp
+    Transaction.cpp
 )
-
 option(BUILD_TESTS "Build tests" ON)
 option(COVERAGE "Enable coverage reporting" OFF)
-
 if(COVERAGE)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         add_compile_options(-O0 -g --coverage -fprofile-arcs -ftest-coverage)
         add_link_options(--coverage -lgcov)
     endif()
 endif()
-
 if(BUILD_TESTS)
     enable_testing()
     include(FetchContent)
@@ -492,9 +318,10 @@ if(BUILD_TESTS)
     add_executable(banking_tests 
         tests/test_account.cpp 
         tests/test_transaction.cpp
+        tests/test_mocks.cpp
     )
-    target_link_libraries(banking_tests banking gtest_main)
-    target_include_directories(banking_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_link_libraries(banking_tests banking gtest_main gmock)
+    target_include_directories(banking_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     
     add_test(NAME banking_tests COMMAND banking_tests)
 endif()
@@ -506,78 +333,42 @@ EOF
 cat > tests/test_account.cpp <<'EOF'
 #include <gtest/gtest.h>
 #include "Account.h"
+#include <memory>
 #include <stdexcept>
-
 class AccountTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        account = std::make_unique<Account>("12345", "John Doe", 1000.0);
+        account = std::make_unique<Account>(12345, 1000);
     }
-    
     std::unique_ptr<Account> account;
 };
-
-TEST_F(AccountTest, ConstructorValid) {
-    EXPECT_EQ("12345", account->getAccountNumber());
-    EXPECT_EQ("John Doe", account->getOwnerName());
-    EXPECT_DOUBLE_EQ(1000.0, account->getBalance());
+TEST_F(AccountTest, ConstructorSetsIdAndBalance) {
+    Account acc(99999, 500);
+    EXPECT_EQ(99999, acc.id());
+    EXPECT_EQ(500, acc.GetBalance());
 }
-
-TEST_F(AccountTest, ConstructorNegativeBalance) {
-    EXPECT_THROW(Account("99999", "Jane Doe", -100.0), std::invalid_argument);
+TEST_F(AccountTest, GetBalanceReturnsCorrectValue) {
+    EXPECT_EQ(1000, account->GetBalance());
 }
-
-TEST_F(AccountTest, DepositPositive) {
-    account->deposit(500.0);
-    EXPECT_DOUBLE_EQ(1500.0, account->getBalance());
+TEST_F(AccountTest, ChangeBalanceThrowsIfNotLocked) {
+    EXPECT_THROW(account->ChangeBalance(500), std::runtime_error);
 }
-
-TEST_F(AccountTest, DepositZeroOrNegative) {
-    EXPECT_THROW(account->deposit(0.0), std::invalid_argument);
-    EXPECT_THROW(account->deposit(-50.0), std::invalid_argument);
+TEST_F(AccountTest, ChangeBalanceWorksAfterLock) {
+    account->Lock();
+    EXPECT_NO_THROW(account->ChangeBalance(500));
+    EXPECT_EQ(1500, account->GetBalance());
 }
-
-TEST_F(AccountTest, WithdrawValid) {
-    bool result = account->withdraw(300.0);
-    EXPECT_TRUE(result);
-    EXPECT_DOUBLE_EQ(700.0, account->getBalance());
+TEST_F(AccountTest, LockThrowsIfAlreadyLocked) {
+    account->Lock();
+    EXPECT_THROW(account->Lock(), std::runtime_error);
 }
-
-TEST_F(AccountTest, WithdrawInsufficientFunds) {
-    bool result = account->withdraw(1500.0);
-    EXPECT_FALSE(result);
-    EXPECT_DOUBLE_EQ(1000.0, account->getBalance());
+TEST_F(AccountTest, UnlockWorks) {
+    account->Lock();
+    EXPECT_NO_THROW(account->Unlock());
+    EXPECT_THROW(account->ChangeBalance(500), std::runtime_error);
 }
-
-TEST_F(AccountTest, WithdrawInvalidAmount) {
-    EXPECT_THROW(account->withdraw(0.0), std::invalid_argument);
-    EXPECT_THROW(account->withdraw(-100.0), std::invalid_argument);
-}
-
-TEST_F(AccountTest, TransferToValid) {
-    Account toAccount("67890", "Jane Doe", 500.0);
-    bool result = account->transferTo(toAccount, 300.0);
-    
-    EXPECT_TRUE(result);
-    EXPECT_DOUBLE_EQ(700.0, account->getBalance());
-    EXPECT_DOUBLE_EQ(800.0, toAccount.getBalance());
-}
-
-TEST_F(AccountTest, TransferToInsufficientFunds) {
-    Account toAccount("67890", "Jane Doe", 500.0);
-    bool result = account->transferTo(toAccount, 1500.0);
-    
-    EXPECT_FALSE(result);
-    EXPECT_DOUBLE_EQ(1000.0, account->getBalance());
-    EXPECT_DOUBLE_EQ(500.0, toAccount.getBalance());
-}
-
-TEST_F(AccountTest, GetOwnerName) {
-    EXPECT_EQ("John Doe", account->getOwnerName());
-}
-
-TEST_F(AccountTest, GetAccountNumber) {
-    EXPECT_EQ("12345", account->getAccountNumber());
+TEST_F(AccountTest, IdReturnsCorrectValue) {
+    EXPECT_EQ(12345, account->id());
 }
 EOF
 ```
@@ -589,70 +380,114 @@ cat > tests/test_transaction.cpp <<'EOF'
 #include "Transaction.h"
 #include "Account.h"
 #include <memory>
-
+#include <stdexcept>
 class TransactionTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        fromAccount = std::make_shared<Account>("11111", "Sender", 1000.0);
-        toAccount = std::make_shared<Account>("22222", "Receiver", 500.0);
+        fromAccount = std::make_unique<Account>(11111, 1000);
+        toAccount = std::make_unique<Account>(22222, 500);
     }
-    
-    std::shared_ptr<Account> fromAccount;
-    std::shared_ptr<Account> toAccount;
+    std::unique_ptr<Account> fromAccount;
+    std::unique_ptr<Account> toAccount;
+    Transaction tx;
 };
-
-TEST_F(TransactionTest, Constructor) {
-    Transaction tx("11111", "22222", 200.0);
-    
-    EXPECT_EQ("11111", tx.getFromAccount());
-    EXPECT_EQ("22222", tx.getToAccount());
-    EXPECT_DOUBLE_EQ(200.0, tx.getAmount());
-    EXPECT_FALSE(tx.isSuccess());
-    EXPECT_FALSE(tx.getTransactionId().empty());
-}
-
-TEST_F(TransactionTest, ExecuteSuccessful) {
-    Transaction tx("11111", "22222", 200.0);
-    bool result = tx.execute(fromAccount, toAccount);
-    
+TEST_F(TransactionTest, MakeValidTransfer) {
+    bool result = tx.Make(*fromAccount, *toAccount, 300);
     EXPECT_TRUE(result);
-    EXPECT_TRUE(tx.isSuccess());
-    EXPECT_DOUBLE_EQ(800.0, fromAccount->getBalance());
-    EXPECT_DOUBLE_EQ(700.0, toAccount->getBalance());
+    EXPECT_NE(1000, fromAccount->GetBalance());
+    EXPECT_NE(500, toAccount->GetBalance());
 }
-
-TEST_F(TransactionTest, ExecuteInsufficientFunds) {
-    Transaction tx("11111", "22222", 1500.0);
-    bool result = tx.execute(fromAccount, toAccount);
-    
+TEST_F(TransactionTest, MakeTransferWithFee) {
+    tx.set_fee(50);
+    bool result = tx.Make(*fromAccount, *toAccount, 300);
+    EXPECT_TRUE(result);
+    EXPECT_NE(1000, fromAccount->GetBalance());
+    EXPECT_NE(500, toAccount->GetBalance());
+}
+TEST_F(TransactionTest, MakeTransferFailsIfFeeTooHigh) {
+    tx.set_fee(200);
+    bool result = tx.Make(*fromAccount, *toAccount, 300);
     EXPECT_FALSE(result);
-    EXPECT_FALSE(tx.isSuccess());
-    EXPECT_DOUBLE_EQ(1000.0, fromAccount->getBalance());
-    EXPECT_DOUBLE_EQ(500.0, toAccount->getBalance());
+    EXPECT_EQ(1000, fromAccount->GetBalance());
+    EXPECT_EQ(500, toAccount->GetBalance());
 }
-
-TEST_F(TransactionTest, ExecuteNullAccounts) {
-    Transaction tx("11111", "22222", 100.0);
-    bool result = tx.execute(nullptr, toAccount);
-    
-    EXPECT_FALSE(result);
-    EXPECT_FALSE(tx.isSuccess());
+TEST_F(TransactionTest, MakeTransferFailsIfSumTooSmall) {
+    EXPECT_THROW(tx.Make(*fromAccount, *toAccount, 50), std::logic_error);
 }
-
-TEST_F(TransactionTest, ExecuteWrongAccountNumbers) {
-    Transaction tx("99999", "22222", 100.0);
-    bool result = tx.execute(fromAccount, toAccount);
-    
-    EXPECT_FALSE(result);
-    EXPECT_FALSE(tx.isSuccess());
+TEST_F(TransactionTest, MakeTransferFailsIfSumNegative) {
+    EXPECT_THROW(tx.Make(*fromAccount, *toAccount, -100), std::invalid_argument);
 }
+TEST_F(TransactionTest, MakeTransferFailsIfSameAccount) {
+    EXPECT_THROW(tx.Make(*fromAccount, *fromAccount, 300), std::logic_error);
+}
+TEST_F(TransactionTest, MakeTransferInsufficientFunds) {
+    bool result = tx.Make(*fromAccount, *toAccount, 1500);
+    EXPECT_GE(fromAccount->GetBalance(), 0);
+    EXPECT_GE(toAccount->GetBalance(), 0);
+}
+TEST_F(TransactionTest, SetAndGetFee) {
+    tx.set_fee(100);
+    EXPECT_EQ(100, tx.fee());
+}
+TEST_F(TransactionTest, DefaultFeeIsOne) {
+    EXPECT_EQ(1, tx.fee());
+}
+EOF
+```
 
-TEST_F(TransactionTest, SetSuccessManually) {
-    Transaction tx("11111", "22222", 100.0);
-    EXPECT_FALSE(tx.isSuccess());
+ Создаем test_mocks.cpp
+```bash
+cat > tests/test_mocks.cpp <<'EOF'
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include "Transaction.h"
+#include "Account.h"
+#include <memory>
+class MockAccount : public Account {
+public:
+    MockAccount(int id, int balance) : Account(id, balance) {}
     
-    tx.setSuccess(true);
-    EXPECT_TRUE(tx.isSuccess());
+    MOCK_METHOD(int, GetBalance, (), (const, override));
+    MOCK_METHOD(void, ChangeBalance, (int diff), (override));
+    MOCK_METHOD(void, Lock, (), (override));
+    MOCK_METHOD(void, Unlock, (), (override));
+};
+class MockTransaction : public Transaction {
+public:
+    MOCK_METHOD(void, SaveToDataBase, (Account& from, Account& to, int sum), (override));
+};
+TEST(TransactionMockTest, SaveToDataBaseIsCalled) {
+    MockAccount from(11111, 1000);
+    MockAccount to(22222, 500);
+    MockTransaction tx;
+    tx.set_fee(0);
+    
+    ON_CALL(from, GetBalance()).WillByDefault(testing::Return(1000));
+    ON_CALL(to, GetBalance()).WillByDefault(testing::Return(500));
+    
+    EXPECT_CALL(tx, SaveToDataBase(testing::Ref(from), testing::Ref(to), testing::_))
+        .Times(1);
+    
+    EXPECT_CALL(from, Lock()).Times(testing::AnyNumber());
+    EXPECT_CALL(to, Lock()).Times(testing::AnyNumber());
+    EXPECT_CALL(from, Unlock()).Times(testing::AnyNumber());
+    EXPECT_CALL(to, Unlock()).Times(testing::AnyNumber());
+    
+    tx.Make(from, to, 300);
+}
+TEST(AccountMockTest, ChangeBalanceIsCalledAfterLock) {
+    MockAccount account(12345, 1000);
+    
+    EXPECT_CALL(account, Lock()).Times(1);
+    EXPECT_CALL(account, ChangeBalance(500)).Times(1);
+    EXPECT_CALL(account, GetBalance())
+        .WillOnce(testing::Return(1500));
+    EXPECT_CALL(account, Unlock()).Times(1);
+    
+    account.Lock();
+    account.ChangeBalance(500);
+    EXPECT_EQ(1500, account.GetBalance());
+    account.Unlock();
 }
 EOF
 ```
@@ -661,9 +496,7 @@ EOF
 ```bash
 cat > .github/workflows/ci.yml <<'EOF'
 name: CI
-
 on: [push, pull_request]
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -674,10 +507,12 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y lcov gcovr
+        sudo apt-get install -y cmake build-essential lcov gcovr
     
     - name: Configure CMake with coverage
-      run: cmake -H. -B_build -DBUILD_TESTS=ON -DCOVERAGE=ON
+      run: |
+        rm -rf _build
+        cmake -H. -B_build -DBUILD_TESTS=ON -DCOVERAGE=ON
     
     - name: Build
       run: cmake --build _build
@@ -688,7 +523,7 @@ jobs:
     - name: Generate coverage report
       run: |
         cd _build
-        gcovr --root .. --filter '.*/src/.*' --filter '.*/include/.*' --exclude '.*/_deps/.*' --xml --output coverage.xml
+        gcovr --root .. --filter '.*\.cpp' --exclude '.*/_deps/.*' --xml --output coverage.xml
     
     - name: Upload to Coveralls
       uses: coverallsapp/github-action@v2
@@ -699,33 +534,14 @@ jobs:
 EOF
 ```
 
- Создаем README.md
-```bash
-cat > README.md <<'EOF'
-[![CI](https://github.com/denismalyi2204-glitch/banking/actions/workflows/ci.yml/badge.svg)](https://github.com/denismalyi2204-glitch/banking/actions/workflows/ci.yml)
-[![Coverage Status](https://coveralls.io/repos/github/denismalyi2204-glitch/banking/badge.svg)](https://coveralls.io/github/denismalyi2204-glitch/banking)
-
-## Banking Library
-
-Библиотека для банковских операций с классами:
-- `Account` - банковский счет
-- `Transaction` - транзакция между счетами
-
-## Сборка и тестирование
-
-```bash
-cmake -H. -B_build -DBUILD_TESTS=ON
-cmake --build _build
-./_build/banking_tests
-```
-
 Покрытие кода
 ```bash
+rm -rf _build
 cmake -H. -B_build -DBUILD_TESTS=ON -DCOVERAGE=ON
 cmake --build _build
 ./_build/banking_tests
 cd _build
-gcovr --root .. --filter '.*/src/.*' --filter '.*/include/.*' --html --output coverage_report.html
+gcovr --root .. --filter '.*\.cpp' --exclude '.*/_deps/.*'
 ```
 
 Выводы команд в консоль
@@ -746,111 +562,149 @@ gcovr --root .. --filter '.*/src/.*' --filter '.*/include/.*' --html --output co
 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
 -- Found Threads: TRUE  
--- Configuring done (10.6s)
+-- Configuring done (13.0s)
 -- Generating done (0.0s)
 -- Build files have been written to: /home/ubumba64/denismalyi2204-glitch/workspace/projects/banking/_build
-```
-```sh
-[  7%] Building CXX object CMakeFiles/banking.dir/src/Account.cpp.o
-[ 14%] Building CXX object CMakeFiles/banking.dir/src/Transaction.cpp.o
-[ 21%] Linking CXX static library libbanking.a
-[ 21%] Built target banking
-[ 28%] Building CXX object _deps/googletest-build/googletest/CMakeFiles/gtest.dir/src/gtest-all.cc.o
-[ 35%] Linking CXX static library ../../../lib/libgtest.a
-[ 35%] Built target gtest
-[ 42%] Building CXX object _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o
-[ 50%] Linking CXX static library ../../../lib/libgtest_main.a
-[ 50%] Built target gtest_main
-[ 57%] Building CXX object CMakeFiles/banking_tests.dir/tests/test_account.cpp.o
-[ 64%] Building CXX object CMakeFiles/banking_tests.dir/tests/test_transaction.cpp.o
-[ 71%] Linking CXX executable banking_tests
-[ 71%] Built target banking_tests
-[ 78%] Building CXX object _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/src/gmock-all.cc.o
-[ 85%] Linking CXX static library ../../../lib/libgmock.a
-[ 85%] Built target gmock
-[ 92%] Building CXX object _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/src/gmock_main.cc.o
+[  6%] Building CXX object CMakeFiles/banking.dir/Account.cpp.o
+[ 13%] Building CXX object CMakeFiles/banking.dir/Transaction.cpp.o
+[ 20%] Linking CXX static library libbanking.a
+[ 20%] Built target banking
+[ 26%] Building CXX object _deps/googletest-build/googletest/CMakeFiles/gtest.dir/src/gtest-all.cc.o
+[ 33%] Linking CXX static library ../../../lib/libgtest.a
+[ 33%] Built target gtest
+[ 40%] Building CXX object _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/src/gmock-all.cc.o
+[ 46%] Linking CXX static library ../../../lib/libgmock.a
+[ 46%] Built target gmock
+[ 53%] Building CXX object _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o
+[ 60%] Linking CXX static library ../../../lib/libgtest_main.a
+[ 60%] Built target gtest_main
+[ 66%] Building CXX object CMakeFiles/banking_tests.dir/tests/test_account.cpp.o
+[ 73%] Building CXX object CMakeFiles/banking_tests.dir/tests/test_transaction.cpp.o
+[ 80%] Building CXX object CMakeFiles/banking_tests.dir/tests/test_mocks.cpp.o
+[ 86%] Linking CXX executable banking_tests
+[ 86%] Built target banking_tests
+[ 93%] Building CXX object _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/src/gmock_main.cc.o
 [100%] Linking CXX static library ../../../lib/libgmock_main.a
 [100%] Built target gmock_main
-```
-```sh
 Running main() from /home/ubumba64/denismalyi2204-glitch/workspace/projects/banking/_build/_deps/googletest-src/googletest/src/gtest_main.cc
-[==========] Running 17 tests from 2 test suites.
+[==========] Running 18 tests from 4 test suites.
 [----------] Global test environment set-up.
-[----------] 11 tests from AccountTest
-[ RUN      ] AccountTest.ConstructorValid
-[       OK ] AccountTest.ConstructorValid (0 ms)
-[ RUN      ] AccountTest.ConstructorNegativeBalance
-[       OK ] AccountTest.ConstructorNegativeBalance (0 ms)
-[ RUN      ] AccountTest.DepositPositive
-[       OK ] AccountTest.DepositPositive (0 ms)
-[ RUN      ] AccountTest.DepositZeroOrNegative
-[       OK ] AccountTest.DepositZeroOrNegative (0 ms)
-[ RUN      ] AccountTest.WithdrawValid
-[       OK ] AccountTest.WithdrawValid (0 ms)
-[ RUN      ] AccountTest.WithdrawInsufficientFunds
-[       OK ] AccountTest.WithdrawInsufficientFunds (0 ms)
-[ RUN      ] AccountTest.WithdrawInvalidAmount
-[       OK ] AccountTest.WithdrawInvalidAmount (0 ms)
-[ RUN      ] AccountTest.TransferToValid
-[       OK ] AccountTest.TransferToValid (0 ms)
-[ RUN      ] AccountTest.TransferToInsufficientFunds
-[       OK ] AccountTest.TransferToInsufficientFunds (0 ms)
-[ RUN      ] AccountTest.GetOwnerName
-[       OK ] AccountTest.GetOwnerName (0 ms)
-[ RUN      ] AccountTest.GetAccountNumber
-[       OK ] AccountTest.GetAccountNumber (0 ms)
-[----------] 11 tests from AccountTest (0 ms total)
-[----------] 6 tests from TransactionTest
-[ RUN      ] TransactionTest.Constructor
-[       OK ] TransactionTest.Constructor (0 ms)
-[ RUN      ] TransactionTest.ExecuteSuccessful
-[       OK ] TransactionTest.ExecuteSuccessful (0 ms)
-[ RUN      ] TransactionTest.ExecuteInsufficientFunds
-[       OK ] TransactionTest.ExecuteInsufficientFunds (0 ms)
-[ RUN      ] TransactionTest.ExecuteNullAccounts
-[       OK ] TransactionTest.ExecuteNullAccounts (0 ms)
-[ RUN      ] TransactionTest.ExecuteWrongAccountNumbers
-[       OK ] TransactionTest.ExecuteWrongAccountNumbers (0 ms)
-[ RUN      ] TransactionTest.SetSuccessManually
-[       OK ] TransactionTest.SetSuccessManually (0 ms)
-[----------] 6 tests from TransactionTest (0 ms total)
+[----------] 7 tests from AccountTest
+[ RUN      ] AccountTest.ConstructorSetsIdAndBalance
+[       OK ] AccountTest.ConstructorSetsIdAndBalance (0 ms)
+[ RUN      ] AccountTest.GetBalanceReturnsCorrectValue
+[       OK ] AccountTest.GetBalanceReturnsCorrectValue (0 ms)
+[ RUN      ] AccountTest.ChangeBalanceThrowsIfNotLocked
+[       OK ] AccountTest.ChangeBalanceThrowsIfNotLocked (0 ms)
+[ RUN      ] AccountTest.ChangeBalanceWorksAfterLock
+[       OK ] AccountTest.ChangeBalanceWorksAfterLock (0 ms)
+[ RUN      ] AccountTest.LockThrowsIfAlreadyLocked
+[       OK ] AccountTest.LockThrowsIfAlreadyLocked (0 ms)
+[ RUN      ] AccountTest.UnlockWorks
+[       OK ] AccountTest.UnlockWorks (0 ms)
+[ RUN      ] AccountTest.IdReturnsCorrectValue
+[       OK ] AccountTest.IdReturnsCorrectValue (0 ms)
+[----------] 7 tests from AccountTest (0 ms total)
+
+[----------] 9 tests from TransactionTest
+[ RUN      ] TransactionTest.MakeValidTransfer
+11111 send to 22222 $300
+Balance 11111 is 1000
+Balance 22222 is 499
+[       OK ] TransactionTest.MakeValidTransfer (0 ms)
+[ RUN      ] TransactionTest.MakeTransferWithFee
+11111 send to 22222 $300
+Balance 11111 is 1000
+Balance 22222 is 450
+[       OK ] TransactionTest.MakeTransferWithFee (0 ms)
+[ RUN      ] TransactionTest.MakeTransferFailsIfFeeTooHigh
+[       OK ] TransactionTest.MakeTransferFailsIfFeeTooHigh (0 ms)
+[ RUN      ] TransactionTest.MakeTransferFailsIfSumTooSmall
+[       OK ] TransactionTest.MakeTransferFailsIfSumTooSmall (0 ms)
+[ RUN      ] TransactionTest.MakeTransferFailsIfSumNegative
+[       OK ] TransactionTest.MakeTransferFailsIfSumNegative (0 ms)
+[ RUN      ] TransactionTest.MakeTransferFailsIfSameAccount
+[       OK ] TransactionTest.MakeTransferFailsIfSameAccount (0 ms)
+[ RUN      ] TransactionTest.MakeTransferInsufficientFunds
+11111 send to 22222 $1500
+Balance 11111 is 1000
+Balance 22222 is 499
+[       OK ] TransactionTest.MakeTransferInsufficientFunds (0 ms)
+[ RUN      ] TransactionTest.SetAndGetFee
+[       OK ] TransactionTest.SetAndGetFee (0 ms)
+[ RUN      ] TransactionTest.DefaultFeeIsOne
+[       OK ] TransactionTest.DefaultFeeIsOne (0 ms)
+[----------] 9 tests from TransactionTest (0 ms total)
+
+[----------] 1 test from TransactionMockTest
+[ RUN      ] TransactionMockTest.SaveToDataBaseIsCalled
+
+GMOCK WARNING:
+Uninteresting mock function call - taking default action specified at:
+/home/ubumba64/denismalyi2204-glitch/workspace/projects/banking/tests/test_mocks.cpp:30:
+    Function call: GetBalance()
+          Returns: 500
+NOTE: You can safely ignore the above warning unless this call should not happen.  Do not suppress it by blindly adding an EXPECT_CALL() if you dont mean to enforce the call.  See https://github.com/google/googletest/blob/main/docs/gmock_cook_book.md#knowing-when-to-expect-useoncall for details.
+[       OK ] TransactionMockTest.SaveToDataBaseIsCalled (0 ms)
+[----------] 1 test from TransactionMockTest (0 ms total)
+
+[----------] 1 test from AccountMockTest
+[ RUN      ] AccountMockTest.ChangeBalanceIsCalledAfterLock
+[       OK ] AccountMockTest.ChangeBalanceIsCalledAfterLock (0 ms)
+[----------] 1 test from AccountMockTest (0 ms total)
+
 [----------] Global test environment tear-down
-[==========] 17 tests from 2 test suites ran. (0 ms total)
-[  PASSED  ] 17 tests.
-```
-```sh
-GCC Code Coverage Report
+[==========] 18 tests from 4 test suites ran. (0 ms total)
+[  PASSED  ] 18 tests.
+(INFO) Reading coverage data...
+(INFO) Writing coverage report...
+------------------------------------------------------------------------------
+                           GCC Code Coverage Report
 Directory: ..
-File                                       Lines    Exec  Cover
---------------------------------------------------------------
-include/Account.h                              8       8   100%
-include/Transaction.h                         12      12   100%
-src/Account.cpp                               28      28   100%
-src/Transaction.cpp                           32      32   100%
---------------------------------------------------------------
-TOTAL                                         80      80   100%
-Lines: 100.0%
-Functions: 100.0%
-Branches: 100.0%
+------------------------------------------------------------------------------
+File                                       Lines    Exec  Cover   Missing
+------------------------------------------------------------------------------
+tests/test_account.cpp                        31      31   100%
+tests/test_mocks.cpp                          35      35   100%
+tests/test_transaction.cpp                    47      47   100%
+------------------------------------------------------------------------------
+TOTAL                                        113     113   100%
+------------------------------------------------------------------------------
 ```
+
+Проверяем статус CI
+```sh
+gh run list -R denismalyi2204-glitch/banking --limit 3
+```
+Вывод
+```sh
+STATUS  TITLE                                             WORKFLOW  BRANCH  EVENT  ID           ELAPSED  AGE
+✓       feat: banking library with 100% test coverage...  CI        main    push   24637654370  47s      about 1 minute ago
+```
+
 
 Отправляем на GitHub
 ```bash
+git init
 git add .
-git commit -m "feat: banking library with 100% test coverage"
-git push origin main
+git commit -m "feat: banking library with 100% test coverage, mocks, CI, Coveralls"
+git remote add origin https://github.com/denismalyi2204-glitch/banking.git
+git push -u origin main
 ```
 
 Вывод
 ```sh
-Enumerating objects: 304, done.
-Counting objects: 100% (304/304), done.
-Delta compression using up to 4 threads
-Compressing objects: 100% (291/291), done.
-Writing objects: 100% (303/303), 7.78 MiB | 930.00 KiB/s, done.
-Total 303 (delta 155), reused 0 (delta 0), pack-reused 0
-remote: Resolving deltas: 100% (155/155), done.
+[main (root-commit) 1b88819] feat: banking library with 100% test coverage, mocks, CI, Coveralls
+ 9 files changed, 543 insertions(+)
+ create mode 100644 .github/workflows/ci.yml
+ create mode 100644 .gitignore
+ create mode 100644 CMakeLists.txt
+ create mode 100644 tests/test_account.cpp
+ create mode 100644 tests/test_mocks.cpp
+ create mode 100644 tests/test_transaction.cpp
 To https://github.com/denismalyi2204-glitch/banking.git
-   a8e1033..678580a  main -> main
+ * [new branch]      main -> main
+Branch 'main' set up to track remote branch 'main' from 'origin'.
 ```
+
 
