@@ -353,7 +353,7 @@ jobs:
         body: |
           ## Solver Application ${{ github.ref_name }}
           
-          ### 📦 Пакеты для установки:
+          ### Пакеты для установки:
           - **DEB** - для Ubuntu/Debian
           - **RPM** - для Fedora/RHEL
           - **TGZ** - архив с бинарными файлами
