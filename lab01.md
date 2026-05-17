@@ -160,12 +160,116 @@ $ find -name "any.hpp"
 ```sh
 $ grep -lr "boost::asio"
 ```
+```
+./boost/asio/ts/internet.hpp
+./boost/asio/ts/netfwd.hpp
+./boost/asio/detail/impl/socket_ops.ipp
+./boost/asio/impl/connect.hpp
+./boost/asio/impl/read.hpp
+./boost/asio/impl/write.hpp
+./boost/asio/impl/io_context.ipp
+./boost/asio/impl/serial_port_base.ipp
+./boost/asio/impl/read_at.hpp
+./boost/asio/impl/write_at.hpp
+./boost/asio/impl/use_awaitable.hpp
+./boost/asio/impl/co_spawn.hpp
+./boost/asio/impl/redirect_error.hpp
+./boost/asio/impl/awaitable.hpp
+./boost/asio/impl/buffered_write_stream.hpp
+./boost/asio/impl/buffered_read_stream.hpp
+./boost/asio/impl/thread_pool.ipp
+./boost/asio/impl/detached.hpp
+./boost/asio/impl/use_future.hpp
+./boost/asio/impl/post.hpp
+./boost/asio/impl/dispatch.hpp
+./boost/asio/impl/defer.hpp
+./boost/asio/impl/executor.hpp
+./boost/asio/impl/execution_context.ipp
+./boost/asio/impl/system_context.ipp
+./boost/asio/impl/system_executor.hpp
+./boost/asio/impl/error.ipp
+./boost/asio/ssl/impl/rfc2818_verification.ipp
+./boost/asio/ssl/impl/context.ipp
+./boost/asio/ssl/impl/error.ipp
+./boost/asio/ssl/detail/impl/engine.ipp
+./boost/asio/ssl/detail/impl/openssl_init.ipp
+./boost/asio/spawn.hpp
+./boost/asio/connect.hpp
+./boost/asio/write.hpp
+./boost/asio/read.hpp
+./boost/asio/read_at.hpp
+./boost/asio/write_at.hpp
+./boost/asio/co_spawn.hpp
+./boost/asio/redirect_error.hpp
+./boost/asio/use_awaitable.hpp
+./boost/asio/awaitable.hpp
+./boost/asio/use_future.hpp
+./boost/asio/detached.hpp
+./boost/boost/asio.hpp
+./boost/asio/ts/buffer.hpp
+./boost/asio/ts/executor.hpp
+./boost/asio/ts/socket.hpp
+./boost/asio/ts/timer.hpp
+```
 Выведем в консоль все файлы, где упоминается последовательность boost::asio.
 
 ```sh
 $ ./bootstrap.sh
 $ sudo ./b2 install
 ```
+```
+Building Boost.Build engine with toolset gcc... 
+Detecting Python version... 3.7
+Detecting Python root... /usr
+Unicode/ICU support for Boost.Regex? not found.
+Backing up existing Boost.Build configuration in project-config.jam.bak
+Generating Boost.Build configuration in project-config.jam...
+
+Bootstrapping is done. To build, run:
+
+    ./b2
+    
+To adjust configuration, edit 'project-config.jam'.
+Further information:
+
+   - Command line help:
+     ./b2 --help
+     
+   - Getting started guide: 
+     http://www.boost.org/more/getting_started/unix-variants.html
+     
+   - Boost.Build documentation:
+     http://www.boost.org/build/
+```
+```
+...patience...
+...patience...
+...found 18975 targets...
+...updating 3877 targets...
+gcc.compile.c++ bin.v2/libs/thread/build/gcc-8/release/threading-multi/pthread/thread.o
+gcc.compile.c++ bin.v2/libs/thread/build/gcc-8/release/threading-multi/pthread/once.o
+gcc.link.dll bin.v2/libs/thread/build/gcc-8/release/threading-multi/libboost_thread.so.1.69.0
+gcc.link.dll ../../stage/lib/libboost_thread.so.1.69.0
+gcc.compile.c++ bin.v2/libs/chrono/build/gcc-8/release/threading-multi/chrono.o
+gcc.compile.c++ bin.v2/libs/chrono/build/gcc-8/release/threading-multi/process_cpu_clocks.o
+gcc.compile.c++ bin.v2/libs/chrono/build/gcc-8/release/threading-multi/thread_clock.o
+gcc.link.dll bin.v2/libs/chrono/build/gcc-8/release/threading-multi/libboost_chrono.so.1.69.0
+gcc.link.dll ../../stage/lib/libboost_chrono.so.1.69.0
+gcc.compile.c++ bin.v2/libs/date_time/build/gcc-8/release/threading-multi/gregorian/greg_month.o
+gcc.compile.c++ bin.v2/libs/date_time/build/gcc-8/release/threading-multi/gregorian/greg_weekday.o
+gcc.compile.c++ bin.v2/libs/date_time/build/gcc-8/release/threading-multi/gregorian/date_generators.o
+gcc.link.dll bin.v2/libs/date_time/build/gcc-8/release/threading-multi/libboost_date_time.so.1.69.0
+gcc.link.dll ../../stage/lib/libboost_date_time.so.1.69.0
+...updated 3877 targets...
+...updated 2455 targets...
+
+The following directory should be added to compiler include paths:
+    /usr/local/include
+
+The following directory should be added to linker library paths:
+    /usr/local/lib
+```
+
 Скомпилируем boost
 
 ```sh
