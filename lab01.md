@@ -80,6 +80,15 @@ $ gem install gist
 Устанавливаем Gist
 
 ```sh
+Fetching gist-6.0.0.gem
+Successfully installed gist-6.0.0
+Parsing documentation for gist-6.0.0
+Installing ri documentation for gist-6.0.0
+Done installing documentation for gist after 0 seconds
+1 gem installed
+```
+
+```sh
 $ (umask 0077 && echo ${GIST_TOKEN} > ~/.gist)
 ```
 Устанавливаем права записи и записываем в скрытый файл наш токен, так как без него мы не сможем ничего отправлять
