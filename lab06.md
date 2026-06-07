@@ -306,8 +306,7 @@ CPack: - package: /home/ubumba64/.../print-0.1.1-Linux.rpm generated.
 
 Создаём cpack.yml для автоматической сборки пакетов
 ```sh
-cat > ~/denismalyi2204-glitch/workspace/projects/lab06/.github/workflows/cpack.yml <<'EOF'
-name: CPack Package Build and Release
+name: Build and Release Packages
 
 on:
   push:
@@ -316,59 +315,68 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-release:
-    runs-on: ubuntu-latest
+  build-packages:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            cpack_generators: "DEB;RPM;TGZ"
+            deps: "cmake build-essential rpm g++"
+          - os: macos-latest
+            cpack_generators: "TGZ"
+            deps: "cmake"
+    
     permissions:
       contents: write
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
     
-    - name: Install dependencies
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake build-essential rpm
+        sudo apt-get install -y ${{ matrix.deps }}
+    
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: brew install ${{ matrix.deps }}
     
     - name: Configure CMake
       run: cmake -H. -B_build -DCMAKE_BUILD_TYPE=Release
     
     - name: Build project
-      run: cmake --build _build
+      run: cmake --build _build --config Release
     
     - name: Create packages
       run: |
         cd _build
-        cpack -G "TGZ"
-        cpack -G "DEB"
-        cpack -G "RPM"
+        cpack -G "${{ matrix.cpack_generators }}" -C Release
         cd ..
     
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+    - name: List packages
+      run: |
+        echo "Generated packages:"
+        ls -la _build/*.deb _build/*.rpm _build/*.tar.gz _build/*.dmg 2>/dev/null || true
+    
+    - name: Upload to GitHub Release
+      uses: softprops/action-gh-release@v2
       with:
-        name: "Release ${{ github.ref_name }}"
-        tag_name: ${{ github.ref_name }}
-        body: |
-          ## Solver Application ${{ github.ref_name }}
-          
-          ### Пакеты для установки:
-          - **DEB** - для Ubuntu/Debian
-          - **RPM** - для Fedora/RHEL
-          - **TGZ** - архив с бинарными файлами
-        draft: false
-        prerelease: false
         files: |
           _build/*.deb
           _build/*.rpm
           _build/*.tar.gz
+          _build/*.dmg
+        fail_on_unmatched_files: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-EOF
 ```
 
-Коммитим изменения и создаём тега
+Коммитим изменения и создаём тег
 ```sh
 cd ~/denismalyi2204-glitch/workspace/projects/lab06
 git add .
@@ -407,33 +415,46 @@ gh run watch -R denismalyi2204-glitch/lab06
 ```
 Вывод
 ```sh
-✓ v1.0.0 CPack Package Build · 24679173586
+? Select a workflow run * Successfully configured CPack with all packages (DEB, RPM, TGZ), Build and Release Packages (v1.0.0) -10s ago
+✓ v1.0.0 Build and Release Packages · 27102860036
 Triggered via push less than a minute ago
 
 JOBS
-✓ build in 25s (ID 72171434659)
+✓ build-packages (ubuntu-latest, DEB;RPM;TGZ, cmake build-essential rpm g++) in 30s (ID 79986648499)
   ✓ Set up job
   ✓ Checkout code
-  ✓ Install dependencies
+  ✓ Install dependencies (Linux)
+  - Install dependencies (macOS)
   ✓ Configure CMake
   ✓ Build project
-  ✓ Create TGZ package
-  ✓ Create DEB package (optional)
-  ✓ Create RPM package (optional)
-  ✓ List generated packages
-  ✓ Upload artifacts
+  ✓ Create packages
+  ✓ List packages
+  ✓ Upload to GitHub Release
+  ✓ Post Checkout code
+  ✓ Complete job
+✓ build-packages (macos-latest, TGZ, cmake) in 25s (ID 79986648504)
+  ✓ Set up job
+  ✓ Checkout code
+  - Install dependencies (Linux)
+  ✓ Install dependencies (macOS)
+  ✓ Configure CMake
+  ✓ Build project
+  ✓ Create packages
+  ✓ List packages
+  ✓ Upload to GitHub Release
+  ✓ Post Checkout code
+  ✓ Complete job
 
-✓ Run CPack Package Build (24679173586) completed with 'success'
-```
+ANNOTATIONS
+! Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, softprops/action-gh-release@v2. Actions will be forced to run with Node.js 24 by default starting June 16th, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+build-packages (macos-latest, TGZ, cmake): .github#2
 
-Структура созданного workflow
-```sh
-.github/workflows/cpack.yml
-├── Триггер: push tags (v*)
-├── Сборка на ubuntu-latest
-├── Установка зависимостей (cmake, rpm)
-├── Конфигурация CMake
-├── Сборка проекта
-├── Создание пакетов (TGZ, DEB, RPM)
-└── Создание GitHub Release с загрузкой пакетов
+! cmake 4.3.2 is already installed and up-to-date.
+To reinstall 4.3.2, run:
+  brew reinstall cmake
+
+build-packages (macos-latest, TGZ, cmake): .github#8
+
+
+✓ Run Build and Release Packages (27102860036) completed with 'success'
 ```
