@@ -322,9 +322,17 @@ jobs:
         include:
           - os: ubuntu-latest
             cpack_generators: "DEB;RPM;TGZ"
-            deps: "cmake build-essential rpm g++"
+            cpack_source_generators: "TGZ;ZIP"
+            deps: "cmake build-essential rpm"
+          
           - os: macos-latest
-            cpack_generators: "TGZ"
+            cpack_generators: "DragNDrop;TGZ"
+            cpack_source_generators: "TGZ;ZIP"
+            deps: "cmake"
+          
+          - os: windows-latest
+            cpack_generators: "WIX;ZIP"
+            cpack_source_generators: "ZIP"
             deps: "cmake"
     
     permissions:
@@ -338,30 +346,35 @@ jobs:
     
     - name: Install dependencies (Linux)
       if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ${{ matrix.deps }}
+      run: sudo apt-get update && sudo apt-get install -y ${{ matrix.deps }}
     
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: brew install ${{ matrix.deps }}
     
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+        choco install wixtoolset -y
+    
     - name: Configure CMake
-      run: cmake -H. -B_build -DCMAKE_BUILD_TYPE=Release
+      run: cmake -B _build -S . -DCMAKE_BUILD_TYPE=Release
     
     - name: Build project
       run: cmake --build _build --config Release
     
-    - name: Create packages
+    - name: Create binary packages
       run: |
         cd _build
         cpack -G "${{ matrix.cpack_generators }}" -C Release
         cd ..
     
-    - name: List packages
+    - name: Create source packages
       run: |
-        echo "Generated packages:"
-        ls -la _build/*.deb _build/*.rpm _build/*.tar.gz _build/*.dmg 2>/dev/null || true
+        cd _build
+        cpack -G "${{ matrix.cpack_source_generators }}" --config CPackSourceConfig.cmake
+        cd ..
     
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v2
@@ -369,8 +382,10 @@ jobs:
         files: |
           _build/*.deb
           _build/*.rpm
-          _build/*.tar.gz
           _build/*.dmg
+          _build/*.msi
+          _build/*.zip
+          _build/*.tar.gz
         fail_on_unmatched_files: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -415,46 +430,65 @@ gh run watch -R denismalyi2204-glitch/lab06
 ```
 Вывод
 ```sh
-? Select a workflow run * Successfully configured CPack with all packages (DEB, RPM, TGZ), Build and Release Packages (v1.0.0) -10s ago
-✓ v1.0.0 Build and Release Packages · 27102860036
-Triggered via push less than a minute ago
+? Select a workflow run * Fix CPackConfig: remove duplicates, fix WIX license path, Build and Release Packages (v1.1.2) -12s ago
+✓ v1.1.2 Build and Release Packages · 27104256894
+Triggered via push about 1 minute ago
 
 JOBS
-✓ build-packages (ubuntu-latest, DEB;RPM;TGZ, cmake build-essential rpm g++) in 30s (ID 79986648499)
+✓ build-packages (windows-latest, WIX;ZIP, ZIP, cmake) in 2m16s (ID 79990436933)
+  ✓ Set up job
+  ✓ Checkout code
+  - Install dependencies (Linux)
+  - Install dependencies (macOS)
+  ✓ Install dependencies (Windows)
+  ✓ Configure CMake
+  ✓ Build project
+  ✓ Create binary packages
+  ✓ Create source packages
+  ✓ Upload to GitHub Release
+  ✓ Post Checkout code
+  ✓ Complete job
+✓ build-packages (ubuntu-latest, DEB;RPM;TGZ, TGZ;ZIP, cmake build-essential rpm) in 27s (ID 79990436942)
   ✓ Set up job
   ✓ Checkout code
   ✓ Install dependencies (Linux)
   - Install dependencies (macOS)
+  - Install dependencies (Windows)
   ✓ Configure CMake
   ✓ Build project
-  ✓ Create packages
-  ✓ List packages
+  ✓ Create binary packages
+  ✓ Create source packages
   ✓ Upload to GitHub Release
   ✓ Post Checkout code
   ✓ Complete job
-✓ build-packages (macos-latest, TGZ, cmake) in 25s (ID 79986648504)
+✓ build-packages (macos-latest, DragNDrop;TGZ, TGZ;ZIP, cmake) in 29s (ID 79990436943)
   ✓ Set up job
   ✓ Checkout code
   - Install dependencies (Linux)
   ✓ Install dependencies (macOS)
+  - Install dependencies (Windows)
   ✓ Configure CMake
   ✓ Build project
-  ✓ Create packages
-  ✓ List packages
+  ✓ Create binary packages
+  ✓ Create source packages
   ✓ Upload to GitHub Release
   ✓ Post Checkout code
   ✓ Complete job
 
 ANNOTATIONS
 ! Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, softprops/action-gh-release@v2. Actions will be forced to run with Node.js 24 by default starting June 16th, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
-build-packages (macos-latest, TGZ, cmake): .github#2
+build-packages (ubuntu-latest, DEB;RPM;TGZ, TGZ;ZIP, cmake build-essential rpm): .github#2
+
+! Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, softprops/action-gh-release@v2. Actions will be forced to run with Node.js 24 by default starting June 16th, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+build-packages (macos-latest, DragNDrop;TGZ, TGZ;ZIP, cmake): .github#2
 
 ! cmake 4.3.2 is already installed and up-to-date.
 To reinstall 4.3.2, run:
   brew reinstall cmake
 
-build-packages (macos-latest, TGZ, cmake): .github#8
+build-packages (macos-latest, DragNDrop;TGZ, TGZ;ZIP, cmake): .github#7
 
 
-✓ Run Build and Release Packages (27102860036) completed with 'success'
+✓ Run Build and Release Packages (27104256894) completed with 'success'
+
 ```
